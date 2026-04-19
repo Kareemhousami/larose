@@ -1,0 +1,108 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isOwner(uid) {
+      return isSignedIn() && request.auth.uid == uid;
+    }
+
+    function isAdmin() {
+      return isSignedIn() && request.auth.token.admin == true;
+    }
+
+    match /products/{productId} {
+      allow read: if true;
+      allow create, delete: if isAdmin();
+      allow update: if isAdmin()
+        || (isSignedIn()
+            && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['reservedCount', 'updatedAt'])
+            && request.resource.data.reservedCount is int
+            && request.resource.data.reservedCount > resource.data.reservedCount);
+    }
+
+    match /categories/{categoryId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    match /flower_types/{flowerTypeId} {
+      allow read: if true;
+      allow write: if isAdmin();
+
+      match /images/{imageId} {
+        allow read: if true;
+        allow write: if isAdmin();
+      }
+    }
+
+    match /events/{eventId} {
+      allow read: if true;
+      allow write: if isAdmin();
+
+      match /bouquets/{imageId} {
+        allow read: if true;
+        allow write: if isAdmin();
+      }
+    }
+
+    match /users/{uid} {
+      allow read, write: if isOwner(uid) || isAdmin();
+
+      match /favorites/{favoriteId} {
+        allow read, write: if isOwner(uid) || isAdmin();
+      }
+
+      match /addresses/{addressId} {
+        allow read, write: if isOwner(uid) || isAdmin();
+      }
+
+      match /cart/{cartId} {
+        allow read, write: if isOwner(uid) || isAdmin();
+
+        match /items/{itemId} {
+          allow read, write: if isOwner(uid) || isAdmin();
+        }
+      }
+    }
+
+    match /delivery_settings/{docId} {
+      allow read: if isSignedIn();
+      allow write: if isAdmin();
+    }
+
+    match /orders/{orderId} {
+      allow create: if isSignedIn()
+        && request.resource.data.userId == request.auth.uid
+        && request.resource.data.keys().hasAll([
+          'userId',
+          'status',
+          'items',
+          'totalMinor',
+          'shippingAddress',
+        ])
+        && request.resource.data.items is list
+        && request.resource.data.totalMinor is int;
+      allow read: if isSignedIn() &&
+        (resource.data.userId == request.auth.uid || isAdmin());
+      allow update: if isAdmin()
+        || (isSignedIn()
+            && resource.data.userId == request.auth.uid
+            && resource.data.status == 'outForDelivery'
+            && request.resource.data.status == 'delivered'
+            && request.resource.data.customerConfirmedDelivered == true);
+      allow delete: if isAdmin();
+
+      match /events/{eventId} {
+        allow read: if isSignedIn() &&
+          (get(/databases/$(database)/documents/orders/$(orderId)).data.userId == request.auth.uid || isAdmin());
+        allow write: if isAdmin()
+          || (isSignedIn()
+              && get(/databases/$(database)/documents/orders/$(orderId)).data.userId == request.auth.uid);
+      }
+    }
+  }
+}
