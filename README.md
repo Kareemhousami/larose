@@ -118,6 +118,12 @@ flutter run
 flutter analyze
 ```
 
+## Android APK Artifact
+
+Pushes to `main` trigger a GitHub Actions workflow that builds a debug Android APK and uploads it as the `larose-apk-main` artifact.
+
+Download it from the corresponding workflow run in the repository's Actions tab.
+
 ## Repository Standards
 
 - Internal planning files and generated automation output are excluded from the public repo surface.
