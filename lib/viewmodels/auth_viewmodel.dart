@@ -216,7 +216,7 @@ class AuthViewModel extends ChangeNotifier {
         );
       case 'weak-password':
         return (
-          'Password is too weak. Use at least 6 characters.',
+          'Password is too weak. Use at least 8 characters with uppercase, lowercase, number, and symbol.',
           AuthErrorAction.none,
         );
       case 'network-request-failed':
@@ -255,7 +255,7 @@ class AuthViewModel extends ChangeNotifier {
         );
       case 'weak-password':
         return (
-          'Password is too weak. Use at least 6 characters.',
+          'Password is too weak. Use at least 8 characters with uppercase, lowercase, number, and symbol.',
           AuthErrorAction.none,
         );
       case 'requires-recent-login':

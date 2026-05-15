@@ -136,8 +136,24 @@ class _SignupScreenState extends State<SignupScreen> {
                       ),
                     ),
                     obscureText: _isPasswordObscured,
-                    validator: (v) =>
-                        (v == null || v.length < 6) ? 'Min 6 characters' : null,
+                    validator: (v) {
+                      if (v == null || v.length < 8) {
+                        return 'Password must be at least 8 characters';
+                      }
+                      if (!RegExp(r'[A-Z]').hasMatch(v)) {
+                        return 'Password must contain an uppercase letter';
+                      }
+                      if (!RegExp(r'[a-z]').hasMatch(v)) {
+                        return 'Password must contain a lowercase letter';
+                      }
+                      if (!RegExp(r'[0-9]').hasMatch(v)) {
+                        return 'Password must contain a number';
+                      }
+                      if (!RegExp(r'[!@#\$%^&*(),.?":{}|<>]').hasMatch(v)) {
+                        return 'Password must contain a symbol';
+                      }
+                      return null;
+                    },
                   ),
                   const SizedBox(height: 12),
 
