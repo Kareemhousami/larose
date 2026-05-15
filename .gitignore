@@ -55,11 +55,10 @@ app.*.map.json
 .env.*
 web/google_maps_api_key.js
 
-# Claude Code
+# Local tooling
 .claude/
 .worktrees/
 worktrees/
-docs/superpowers/
 
 # Screenshots / local docs
 *.png
